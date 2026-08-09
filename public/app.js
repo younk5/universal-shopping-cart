@@ -4,6 +4,10 @@
 
 import {
   loginWithGoogle,
+  loginWithIdentifier,
+  registerWithEmail,
+  resetPassword,
+  getEmailForUsername,
   logout,
   watchAuthState,
   saveWishlist,
@@ -612,12 +616,113 @@ function initDataActions() {
   };
 }
 
+function translateAuthError(err) {
+  const messages = {
+    'auth/invalid-email': 'E-mail inválido.',
+    'auth/user-not-found': 'Não encontrei conta com esse e-mail/usuário.',
+    'auth/wrong-password': 'Senha incorreta.',
+    'auth/invalid-credential': 'E-mail, usuário ou senha incorretos.',
+    'auth/email-already-in-use': 'Já existe uma conta com esse e-mail.',
+    'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+    'auth/missing-password': 'Digite uma senha.',
+    'auth/too-many-requests': 'Muitas tentativas. Tente novamente em alguns minutos.',
+    'auth/popup-closed-by-user': 'Login cancelado.',
+    'username-taken': 'Esse nome de usuário já está em uso, escolha outro.',
+  };
+  return messages[err?.code] || 'Não consegui entrar: ' + (err?.message || 'tente novamente.');
+}
+
 function initAuth() {
+  let authMode = 'login';
+
+  const usernameInput = document.getElementById('authUsername');
+  const emailInput = document.getElementById('authEmail');
+  const passwordInput = document.getElementById('authPassword');
+  const authForm = document.getElementById('emailAuthForm');
+  const authBtn = document.getElementById('emailAuthBtn');
+  const modeToggle = document.getElementById('authModeToggle');
+  const forgotBtn = document.getElementById('forgotPasswordBtn');
+  const authError = document.getElementById('authError');
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    authBtn.textContent = mode === 'login' ? 'Entrar' : 'Criar conta';
+    modeToggle.textContent = mode === 'login' ? 'Não tem conta? Criar conta' : 'Já tem conta? Entrar';
+    usernameInput.hidden = mode !== 'register';
+    passwordInput.autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+    if (mode === 'register') {
+      emailInput.type = 'email';
+      emailInput.placeholder = 'E-mail';
+      emailInput.autocomplete = 'email';
+    } else {
+      emailInput.type = 'text';
+      emailInput.placeholder = 'E-mail ou usuário';
+      emailInput.autocomplete = 'username';
+    }
+    authError.textContent = '';
+  }
+  setAuthMode('login');
+
+  modeToggle.onclick = () => setAuthMode(authMode === 'login' ? 'register' : 'login');
+
+  authForm.onsubmit = (e) => {
+    e.preventDefault();
+    authError.textContent = '';
+    const identifier = emailInput.value.trim();
+    const password = passwordInput.value;
+    if (!identifier || !password) return;
+
+    if (authMode === 'register') {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        authError.textContent = 'Digite um nome de usuário.';
+        return;
+      }
+      if (!/^[a-zA-Z0-9_.]{3,20}$/.test(username)) {
+        authError.textContent = 'Usuário: 3 a 20 caracteres (letras, números, _ ou .).';
+        return;
+      }
+      registerWithEmail(identifier, password, username)
+        .then(() => {
+          const label = document.getElementById('userLabel');
+          if (label) label.textContent = username;
+        })
+        .catch((err) => {
+          authError.textContent = translateAuthError(err);
+        });
+    } else {
+      loginWithIdentifier(identifier, password).catch((err) => {
+        authError.textContent = translateAuthError(err);
+      });
+    }
+  };
+
+  forgotBtn.onclick = () => {
+    authError.textContent = '';
+    const identifier = emailInput.value.trim();
+    if (!identifier) {
+      authError.textContent = 'Digite seu e-mail ou usuário acima primeiro pra receber o link de redefinição.';
+      return;
+    }
+    const emailLookup = identifier.includes('@')
+      ? Promise.resolve(identifier)
+      : getEmailForUsername(identifier).then((found) => {
+          if (!found) throw Object.assign(new Error(), { code: 'auth/user-not-found' });
+          return found;
+        });
+
+    emailLookup
+      .then((email) => resetPassword(email))
+      .then(() => showToast('Enviamos um link de redefinição de senha pro seu e-mail.'))
+      .catch((err) => {
+        authError.textContent = translateAuthError(err);
+      });
+  };
+
   document.getElementById('googleLoginBtn').onclick = () => {
-    document.getElementById('authError').textContent = '';
+    authError.textContent = '';
     loginWithGoogle().catch((err) => {
-      document.getElementById('authError').textContent =
-        'Não consegui entrar: ' + (err.message || 'tente novamente.');
+      authError.textContent = translateAuthError(err);
     });
   };
   document.getElementById('logoutBtn').onclick = () => logout();

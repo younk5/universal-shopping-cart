@@ -10,7 +10,21 @@
 <div class="auth-screen" id="authScreen">
   <div class="auth-card">
     <h1>Lista de compras</h1>
-    <p>Entre com sua conta Google pra acessar sua lista, salva na nuvem e sincronizada entre seus dispositivos.</p>
+    <p>Entre pra acessar sua lista, salva na nuvem e sincronizada entre seus dispositivos.</p>
+
+    <form id="emailAuthForm">
+      <input type="text" id="authUsername" placeholder="Nome de usuário" autocomplete="username" hidden>
+      <input type="text" id="authEmail" placeholder="E-mail ou usuário" autocomplete="username" required>
+      <input type="password" id="authPassword" placeholder="Senha" autocomplete="current-password" required>
+      <button type="submit" class="btn-primary" id="emailAuthBtn">Entrar</button>
+    </form>
+    <div class="auth-toggle">
+      <button class="link-btn" id="authModeToggle">Não tem conta? Criar conta</button>
+      <button class="link-btn" id="forgotPasswordBtn">Esqueci minha senha</button>
+    </div>
+
+    <div class="auth-divider"><span>ou</span></div>
+
     <button class="btn-primary" id="googleLoginBtn">Entrar com Google</button>
     <p class="fetch-status error" id="authError"></p>
   </div>

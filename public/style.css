@@ -23,11 +23,18 @@ body {
 .app { width: 100%; max-width: 520px; }
 
 .auth-screen { width: 100%; min-height: calc(100vh - 48px); display: flex; align-items: center; justify-content: center; }
+.auth-screen[hidden] { display: none; }
 .auth-card { max-width: 340px; width: 100%; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px 22px; }
 .auth-card h1 { margin: 0 0 10px; }
 .auth-card p { color: var(--text-dim); font-size: 13px; margin: 0 0 18px; }
 .auth-card .btn-primary { width: 100%; padding: 10px; }
 .auth-card .fetch-status { margin-top: 10px; }
+#emailAuthForm { display: flex; flex-direction: column; gap: 8px; }
+#emailAuthForm input { width: 100%; }
+.auth-toggle { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; gap: 8px; }
+.auth-toggle .link-btn { font-size: 12px; white-space: nowrap; }
+.auth-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: var(--text-dim); font-size: 12px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 .user-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
 
