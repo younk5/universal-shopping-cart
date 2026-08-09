@@ -1,0 +1,15 @@
+{
+  "name": "Lista de Compras",
+  "short_name": "Compras",
+  "description": "Organize e sincronize sua lista de compras e desejos entre dispositivos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

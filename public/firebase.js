@@ -1,4 +1,6 @@
-// inicialização do Firebase (Auth com Google + Firestore)
+// ---------------------------------------------------------------------------
+// Inicialização do Firebase (Auth com Google + Firestore)
+// ---------------------------------------------------------------------------
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import {

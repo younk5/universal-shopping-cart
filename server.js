@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getPreviewData } from './lib/preview.js';
-import { isRateLimited } from './lib/rateLimit.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -14,10 +13,6 @@ app.get('/api/preview', async (req, res) => {
   const url = req.query.url;
   if (!url || typeof url !== 'string') {
     return res.status(400).json({ error: 'url é obrigatória' });
-  }
-
-  if (isRateLimited(req.ip)) {
-    return res.status(429).json({ error: 'Muitas buscas em pouco tempo. Espere um pouco e tente de novo.' });
   }
 
   try {

@@ -1,4 +1,6 @@
-// armazenamento (Firebase: Auth com Google + Firestore por usuário)
+// ---------------------------------------------------------------------------
+// Armazenamento (Firebase: Auth com Google + Firestore por usuário)
+// ---------------------------------------------------------------------------
 
 import {
   loginWithGoogle,
@@ -16,7 +18,9 @@ let currentUid = null;
 let unsubscribeWishlist = null;
 let dataReady = false;
 
-// utilidades gerais
+// ---------------------------------------------------------------------------
+// Utilidades
+// ---------------------------------------------------------------------------
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -100,7 +104,9 @@ function slugify(str) {
   );
 }
 
-// estado do app
+// ---------------------------------------------------------------------------
+// Estado
+// ---------------------------------------------------------------------------
 
 const DEFAULT_CATEGORIES = [
   { id: 'mouses', label: 'Mouses' },
@@ -170,7 +176,9 @@ function save() { persistToCloud(); }
 function saveCategories() { persistToCloud(); }
 function catLabel(id) { return (categories.find((c) => c.id === id) || {}).label || id; }
 
-// ações (o que acontece quando o usuário mexe em algo)
+// ---------------------------------------------------------------------------
+// Ações
+// ---------------------------------------------------------------------------
 
 function openNewForm() {
   editingId = null;
@@ -361,7 +369,9 @@ function importData(file) {
   reader.readAsText(file);
 }
 
-// listas/derivados usados na hora de renderizar
+// ---------------------------------------------------------------------------
+// Derivação de dados para exibição
+// ---------------------------------------------------------------------------
 
 function sortItems(list) {
   const sorted = [...list];
@@ -396,7 +406,9 @@ function computeTotals() {
   return { pendingCount: pendingItems.length, pendingTotal, totalCount: items.length };
 }
 
-// renderização
+// ---------------------------------------------------------------------------
+// Renderização
+// ---------------------------------------------------------------------------
 
 function render() {
   renderHeaderAndSummary();
@@ -520,7 +532,7 @@ function renderItems() {
   itemsEl.innerHTML = sorted.map((item) => `
     <div class="item ${item.bought ? 'bought' : ''}">
       <button class="check ${item.bought ? 'checked' : ''}" data-toggle="${item.id}" aria-label="${item.bought ? 'Desmarcar' : 'Marcar como comprado'}">${item.bought ? '✓' : ''}</button>
-      ${item.image && safeImageSrc(item.image) ? `<img class="item-img" src="${escapeAttr(safeImageSrc(item.image))}" alt="">` : ''}
+      ${item.image && safeImageSrc(item.image) ? `<img class="item-img" src="${escapeAttr(safeImageSrc(item.image))}" alt="" aria-hidden="true" width="40" height="40" loading="lazy" decoding="async">` : ''}
       <div class="item-body">
         <div class="item-name-row">
           <span class="item-name ${item.bought ? 'bought' : ''}">${escapeHtml(item.name)}</span>
@@ -562,7 +574,7 @@ function renderForm() {
         <button class="btn-fetch" id="f-fetch" ${fetching ? 'disabled' : ''}>${fetching ? 'Buscando...' : 'Buscar dados'}</button>
       </div>
       <div class="fetch-status ${fetchError ? 'error' : ''}">${escapeHtml(fetchStatus)}</div>
-      ${form.image ? `<div class="preview"><img src="${escapeAttr(form.image)}" alt=""><span style="font-size:12px;color:var(--text-dim)">Imagem encontrada</span></div>` : ''}
+      ${form.image ? `<div class="preview"><img src="${escapeAttr(form.image)}" alt="" aria-hidden="true" width="36" height="36" loading="lazy" decoding="async"><span style="font-size:12px;color:var(--text-dim)">Imagem encontrada</span></div>` : ''}
       <input id="f-name" placeholder="Nome do item" value="${escapeAttr(form.name)}">
       <div class="row">
         <select id="f-cat">
@@ -610,7 +622,9 @@ function renderToast() {
   if (undoBtn) undoBtn.onclick = handleUndo;
 }
 
-// boot do app
+// ---------------------------------------------------------------------------
+// Inicialização
+// ---------------------------------------------------------------------------
 
 function initDataActions() {
   document.getElementById('exportBtn').onclick = exportData;
