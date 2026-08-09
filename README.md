@@ -87,9 +87,18 @@ informado pelo usuário, ele:
 
 - só aceita links `http`/`https`;
 - bloqueia endereços internos/privados (localhost, redes `10.x`,
-  `192.168.x`, `169.254.x`, etc.), inclusive em redirecionamentos;
+  `192.168.x`, `169.254.x`/metadata de nuvem, IPv6 equivalentes, etc.),
+  inclusive em redirecionamentos;
+- resolve o DNS uma única vez e conecta direto no IP validado (em vez de
+  deixar a biblioteca de HTTP resolver de novo por conta própria) — isso
+  fecha uma brecha clássica de "DNS rebinding", onde o mesmo hostname
+  responde um IP diferente entre a checagem e a conexão real;
 - aplica um tempo limite de 8s e um limite de tamanho de resposta (3MB)
-  pra evitar que um link mal-intencionado ou muito lento trave o servidor.
+  pra evitar que um link mal-intencionado ou muito lento trave o servidor;
+- tem um rate limit simples por IP pra não virar um proxy livre pra
+  bater em qualquer URL (ver `lib/rateLimit.js` — vale lembrar que na
+  Vercel isso é por instância da function, não é uma defesa forte de
+  verdade, só reduz abuso casual).
 
 Se um link for bloqueado ou não puder ser acessado, é só preencher os
 dados manualmente.
@@ -98,6 +107,30 @@ Essa lógica de busca fica em `lib/preview.js`, usada tanto pelo
 `server.js` (rodando local) quanto por `api/preview.js` (rodando como
 Vercel Function em produção) — assim as duas versões nunca ficam
 dessincronizadas.
+
+## Limitação conhecida: login por usuário e e-mail
+
+Pra permitir login com "nome de usuário" (além de e-mail), o app mantém
+uma coleção pública `usernames/{username}` no Firestore que guarda
+`{ uid, email }`, com leitura (`get`, não `list`) liberada pra qualquer
+um — inclusive sem estar logado. Isso é necessário porque o Firebase
+Auth só reconhece e-mail nativamente, e a resolução usuário → e-mail
+precisa acontecer antes do login, direto do navegador.
+
+Isso significa que, embora a interface nunca revele se um e-mail/usuário
+tem conta ou não (mensagens de erro genéricas, tanto no login quanto no
+"esqueci minha senha"), alguém que já saiba ou consiga adivinhar um nome
+de usuário pode consultar o Firestore diretamente (com o SDK do
+Firebase, sem passar pelo app) e descobrir o e-mail associado. Ou seja,
+a proteção contra enumeração de contas existe na UI, mas não no dado em
+si — quem for direto na API do Firestore não passa por ela.
+
+Pra um app pessoal/uso pequeno isso costuma ser um risco aceitável, mas
+vale saber que existe. Se um dia isso importar mais, a forma correta de
+fechar de vez seria mover essa resolução usuário → e-mail pra trás de
+uma Cloud Function (que não devolve o e-mail cru pro cliente), com
+Firebase App Check e algum rate limit de verdade — isso é uma mudança
+de arquitetura maior (exige plano Blaze), então não foi feito aqui.
 
 ## Deploy na Vercel
 

@@ -16,9 +16,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "cheerio": "^1.2.0"
-  },
-  "devDependencies": {
+    "cheerio": "^1.2.0",
     "express": "^5.2.1"
   }
 }

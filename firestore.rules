@@ -11,11 +11,18 @@ service cloud.firestore {
     }
 
     // Mapa "nome de usuário -> e-mail", usado para permitir login por
-    // usuário. Leitura é pública (necessária ANTES do login, pra descobrir
-    // o e-mail correspondente), mas só o próprio dono (já autenticado, uid
-    // batendo com o campo salvo) pode criar/alterar seu registro.
+    // usuário. "get" (buscar 1 doc pelo ID) é público, necessário ANTES do
+    // login pra descobrir o e-mail correspondente a um usuário específico.
+    // "list" fica bloqueado de propósito: sem isso, qualquer pessoa não
+    // autenticada poderia listar a coleção inteira e vazar todos os
+    // e-mails cadastrados. Só o dono (uid batendo) pode criar/alterar.
+    //
+    // Mesmo com "list" bloqueado, um "get" de um username específico já
+    // devolve o e-mail associado — ver "Limitação conhecida" no README
+    // pra entender o trade-off e o que fazer se isso virar um problema.
     match /usernames/{username} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if false;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
       allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }

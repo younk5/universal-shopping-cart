@@ -1,6 +1,4 @@
-// ---------------------------------------------------------------------------
-// Armazenamento (Firebase: Auth com Google + Firestore por usuário)
-// ---------------------------------------------------------------------------
+// armazenamento (Firebase: Auth com Google + Firestore por usuário)
 
 import {
   loginWithGoogle,
@@ -18,9 +16,7 @@ let currentUid = null;
 let unsubscribeWishlist = null;
 let dataReady = false;
 
-// ---------------------------------------------------------------------------
-// Utilidades
-// ---------------------------------------------------------------------------
+// utilidades gerais
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -33,6 +29,25 @@ const escapeAttr = escapeHtml;
 
 function normalizeText(s) {
   return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+// Só deixa passar http/https pra evitar XSS via "javascript:" (ou outro
+// esquema perigoso) num link/imagem vindo de um item importado ou colado
+// manualmente. Sempre retorna null se não for seguro pra usar como href/src.
+function safeHttpUrl(raw) {
+  if (!raw) return null;
+  try {
+    const u = new URL(String(raw), window.location.href);
+    return u.protocol === 'http:' || u.protocol === 'https:' ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function safeImageSrc(raw) {
+  const httpUrl = safeHttpUrl(raw);
+  if (httpUrl) return httpUrl;
+  return typeof raw === 'string' && /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(raw) ? raw : null;
 }
 
 // Converte texto de preço em número, aceitando tanto "1.234,56" (BR)
@@ -85,9 +100,7 @@ function slugify(str) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Estado
-// ---------------------------------------------------------------------------
+// estado do app
 
 const DEFAULT_CATEGORIES = [
   { id: 'mouses', label: 'Mouses' },
@@ -157,9 +170,7 @@ function save() { persistToCloud(); }
 function saveCategories() { persistToCloud(); }
 function catLabel(id) { return (categories.find((c) => c.id === id) || {}).label || id; }
 
-// ---------------------------------------------------------------------------
-// Ações
-// ---------------------------------------------------------------------------
+// ações (o que acontece quando o usuário mexe em algo)
 
 function openNewForm() {
   editingId = null;
@@ -350,9 +361,7 @@ function importData(file) {
   reader.readAsText(file);
 }
 
-// ---------------------------------------------------------------------------
-// Derivação de dados para exibição
-// ---------------------------------------------------------------------------
+// listas/derivados usados na hora de renderizar
 
 function sortItems(list) {
   const sorted = [...list];
@@ -387,9 +396,7 @@ function computeTotals() {
   return { pendingCount: pendingItems.length, pendingTotal, totalCount: items.length };
 }
 
-// ---------------------------------------------------------------------------
-// Renderização
-// ---------------------------------------------------------------------------
+// renderização
 
 function render() {
   renderHeaderAndSummary();
@@ -487,7 +494,8 @@ function renderItemMeta(item) {
   if (item.price != null) {
     parts.push(item.qty > 1 ? `${item.qty}× ${formatBRL(item.price)} = ${formatBRL(item.price * item.qty)}` : formatBRL(item.price));
   }
-  if (item.link) parts.push(`<a href="${escapeAttr(item.link)}" target="_blank" rel="noreferrer">Ver item ↗</a>`);
+  const href = safeHttpUrl(item.link);
+  if (href) parts.push(`<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">Ver item ↗</a>`);
   if (!parts.length) return '';
   return `<div class="meta">${parts.map((p) => `<span>${p}</span>`).join('')}</div>`;
 }
@@ -512,7 +520,7 @@ function renderItems() {
   itemsEl.innerHTML = sorted.map((item) => `
     <div class="item ${item.bought ? 'bought' : ''}">
       <button class="check ${item.bought ? 'checked' : ''}" data-toggle="${item.id}" aria-label="${item.bought ? 'Desmarcar' : 'Marcar como comprado'}">${item.bought ? '✓' : ''}</button>
-      ${item.image ? `<img class="item-img" src="${escapeAttr(item.image)}" alt="">` : ''}
+      ${item.image && safeImageSrc(item.image) ? `<img class="item-img" src="${escapeAttr(safeImageSrc(item.image))}" alt="">` : ''}
       <div class="item-body">
         <div class="item-name-row">
           <span class="item-name ${item.bought ? 'bought' : ''}">${escapeHtml(item.name)}</span>
@@ -602,9 +610,7 @@ function renderToast() {
   if (undoBtn) undoBtn.onclick = handleUndo;
 }
 
-// ---------------------------------------------------------------------------
-// Inicialização
-// ---------------------------------------------------------------------------
+// boot do app
 
 function initDataActions() {
   document.getElementById('exportBtn').onclick = exportData;
@@ -616,7 +622,14 @@ function initDataActions() {
   };
 }
 
-function translateAuthError(err) {
+function translateAuthError(err, { genericCredentials = false } = {}) {
+  // Em telas de login, não diferenciamos "não existe" de "senha errada":
+  // isso evita que alguém descubra quais e-mails/usuários têm conta só
+  // testando o formulário (enumeração de contas).
+  if (genericCredentials) {
+    const credentialCodes = ['auth/user-not-found', 'auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-email'];
+    if (credentialCodes.includes(err?.code)) return 'E-mail/usuário ou senha incorretos.';
+  }
   const messages = {
     'auth/invalid-email': 'E-mail inválido.',
     'auth/user-not-found': 'Não encontrei conta com esse e-mail/usuário.',
@@ -692,7 +705,7 @@ function initAuth() {
         });
     } else {
       loginWithIdentifier(identifier, password).catch((err) => {
-        authError.textContent = translateAuthError(err);
+        authError.textContent = translateAuthError(err, { genericCredentials: true });
       });
     }
   };
@@ -704,18 +717,18 @@ function initAuth() {
       authError.textContent = 'Digite seu e-mail ou usuário acima primeiro pra receber o link de redefinição.';
       return;
     }
+    // Sempre mostra a mesma mensagem no final, exista a conta ou não —
+    // do contrário, esse formulário vira uma forma fácil de descobrir
+    // quais e-mails/usuários têm conta no app (enumeração de contas).
     const emailLookup = identifier.includes('@')
       ? Promise.resolve(identifier)
-      : getEmailForUsername(identifier).then((found) => {
-          if (!found) throw Object.assign(new Error(), { code: 'auth/user-not-found' });
-          return found;
-        });
+      : getEmailForUsername(identifier);
 
     emailLookup
-      .then((email) => resetPassword(email))
-      .then(() => showToast('Enviamos um link de redefinição de senha pro seu e-mail.'))
-      .catch((err) => {
-        authError.textContent = translateAuthError(err);
+      .then((email) => (email ? resetPassword(email) : null))
+      .catch(() => {})
+      .finally(() => {
+        showToast('Se existir uma conta com esse e-mail/usuário, enviamos um link de redefinição de senha.');
       });
   };
 
