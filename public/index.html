@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de compras</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h1>Lista de compras</h1>
+    <p>Entre com sua conta Google pra acessar sua lista, salva na nuvem e sincronizada entre seus dispositivos.</p>
+    <button class="btn-primary" id="googleLoginBtn">Entrar com Google</button>
+    <p class="fetch-status error" id="authError"></p>
+  </div>
+</div>
+
+<div class="app" id="appRoot" hidden>
+  <div class="user-bar">
+    <span id="userLabel"></span>
+    <button class="link-btn" id="logoutBtn">Sair</button>
+  </div>
+
+  <header>
+    <h1>Lista de compras</h1>
+    <span class="pending" id="pendingCount"></span>
+  </header>
+  <div class="summary" id="summary"></div>
+
+  <div class="toolbar" id="toolbar"></div>
+
+  <div class="filters" id="filters"></div>
+  <div class="items" id="items"></div>
+
+  <div id="formArea"></div>
+
+  <div class="data-actions">
+    <button class="link-btn" id="exportBtn">Exportar backup</button>
+    <button class="link-btn" id="importBtn">Importar backup</button>
+    <input type="file" id="importInput" accept="application/json" hidden>
+  </div>
+</div>
+
+<div id="toastArea"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

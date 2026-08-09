@@ -1,0 +1,24 @@
+{
+  "name": "lista-compras",
+  "version": "1.1.0",
+  "description": "Lista de compras/desejos com busca automática de dados do produto, edição, categorias personalizáveis e backup local.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "express": "^5.2.1"
+  }
+}
