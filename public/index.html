@@ -5,29 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Título e descrição -->
-<title>Lista de Compras – Organize e Sincronize suas Compras Online</title>
-<meta name="description" content="Organize sua lista de compras online: busque dados de produtos automaticamente pelo link, use categorias personalizadas e sincronize tudo entre seus dispositivos com login seguro.">
+<title>cartbuy</title>
 <meta name="author" content="Younk">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="cartbuy.vercel.app">
+<link rel="canonical" href="https://cartbuy.vercel.app/">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Lista de Compras">
-<meta property="og:title" content="Lista de Compras – Organize e Sincronize suas Compras Online">
-<meta property="og:description" content="Organize sua lista de compras online: busque dados de produtos automaticamente pelo link, use categorias personalizadas e sincronize tudo entre seus dispositivos.">
-<meta property="og:url" content="cartbuy.vercel.app">
-<meta property="og:image" content="cartbuy.vercel.app/og-image.webp">
+<meta property="og:site_name" content="cartbuy">
+<meta property="og:url" content="https://cartbuy.vercel.app/">
+<meta property="og:image" content="https://cartbuy.vercel.app/og-image.webp">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/webp">
 <meta property="og:locale" content="pt_BR">
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Lista de Compras – Organize e Sincronize suas Compras Online">
-<meta name="twitter:description" content="Organize sua lista de compras online: busque dados de produtos automaticamente pelo link, use categorias personalizadas e sincronize tudo entre seus dispositivos.">
-<meta name="twitter:image" content="cartbuy.vercel.app/og-image.webp">
 
 <!-- Favicons -->
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -49,9 +41,9 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Lista de Compras",
+  "name": "cartbuy",
   "description": "Aplicativo para organizar listas de compras e desejos, com busca automática de dados do produto, categorias personalizáveis, sincronização na nuvem e backup local.",
-  "url": "https://[SEU-DOMINIO].vercel.app/",
+  "url": "https://cartbuy.vercel.app/",
   "inLanguage": "pt-BR",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Web",
@@ -66,8 +58,7 @@
 <body>
 <div class="auth-screen" id="authScreen">
   <div class="auth-card">
-    <h1>Lista de compras</h1>
-    <p>Entre pra acessar sua lista, salva na nuvem e sincronizada entre seus dispositivos.</p>
+    <h1>Login</h1>
 
     <form id="emailAuthForm">
       <input type="text" id="authUsername" placeholder="Nome de usuário" autocomplete="username" hidden>
@@ -94,23 +85,24 @@
   </div>
 
   <header>
-    <h1>Lista de compras</h1>
+    <h1>cartbuy</h1>
     <span class="pending" id="pendingCount"></span>
   </header>
   <div class="summary" id="summary"></div>
+
+  <div class="top-bar">
+    <div id="formArea"></div>
+    <div class="data-actions">
+      <button class="btn-secondary" id="exportBtn">Exportar backup</button>
+      <button class="btn-secondary" id="importBtn">Importar backup</button>
+      <input type="file" id="importInput" accept="application/json" hidden>
+    </div>
+  </div>
 
   <div class="toolbar" id="toolbar"></div>
 
   <div class="filters" id="filters"></div>
   <div class="items" id="items"></div>
-
-  <div id="formArea"></div>
-
-  <div class="data-actions">
-    <button class="link-btn" id="exportBtn">Exportar backup</button>
-    <button class="link-btn" id="importBtn">Importar backup</button>
-    <input type="file" id="importInput" accept="application/json" hidden>
-  </div>
 </div>
 
 <div id="toastArea"></div>
